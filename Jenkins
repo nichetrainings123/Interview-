@@ -1,0 +1,193 @@
+Perfect ✅ — here’s a complete Jenkins Declarative Pipeline notes summary, including:
+
+Core concepts,
+
+Pipeline as Code explanation,
+
+Structure & syntax, and
+
+All block names with meanings — in one clean, copyable format for study, documentation, or Excel use.
+
+🧩 JENKINS PIPELINE AS CODE — COMPLETE NOTES SUMMARY
+🧠 1️⃣ Overview
+Topic	Details
+Definition	Pipeline as Code means defining CI/CD workflows using code (Jenkinsfile) instead of configuring them manually in the Jenkins UI.
+File Name	Jenkinsfile (stored at root of your source repository).
+Language Used	Groovy-based DSL (Domain Specific Language).
+Benefits	Version-controlled, reproducible, reviewable, scalable, supports automation and reusability.
+Pipeline Types	🔹 Declarative Pipeline (Structured, preferred)
+🔹 Scripted Pipeline (Flexible, Groovy syntax).
+🧩 2️⃣ Declarative Pipeline Overview
+Feature	Declarative Pipeline
+Structure	Defined inside a single pipeline {} block.
+Readability	Easy to understand (structured format).
+Validation	Syntax is validated automatically by Jenkins.
+Common Use	Build, Test, Deploy stages with automation.
+🧱 3️⃣ Basic Declarative Pipeline Example
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh './deploy.sh'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build succeeded!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
+
+🧩 4️⃣ Complete Declarative Pipeline Syntax Structure
+Block Name	Purpose / Description	Can Appear In	Example Syntax
+pipeline {}	Root block for defining the entire pipeline.	Top-level	pipeline { agent any stages { ... } }
+agent {}	Defines where the pipeline or stage runs (node, label, docker, dockerfile).	Inside pipeline or stage	agent { docker { image 'node:20' } }
+environment {}	Sets environment variables globally or per stage.	Inside pipeline or stage	environment { APP_ENV = 'prod'; PATH = "$PATH:/usr/bin" }
+options {}	Configures pipeline runtime options.	Inside pipeline or stage	options { timeout(time: 10, unit: 'MINUTES'); timestamps() }
+parameters {}	Defines user inputs (string, choice, boolean, password).	Inside pipeline	parameters { string(name: 'BRANCH', defaultValue: 'main') }
+triggers {}	Sets automatic triggers for builds (cron, SCM polling, upstream).	Inside pipeline	triggers { cron('H 12 * * *') }
+tools {}	Installs and configures tools like JDK, Maven, Node.js.	Inside pipeline or stage	tools { maven 'Maven_3_9_5'; jdk 'JDK_17' }
+stages {}	Groups all stages in the pipeline.	Inside pipeline	stages { stage('Build') { ... } }
+stage {}	Represents a single step or logical section of the pipeline.	Inside stages	stage('Test') { steps { sh 'mvn test' } }
+steps {}	Defines the actual commands Jenkins executes.	Inside stage	steps { sh 'npm install'; echo 'Building...' }
+post {}	Defines actions to run after completion (always, success, failure, etc.).	Inside pipeline or stage	post { success { echo 'Success' } }
+when {}	Adds conditional logic for whether a stage should run.	Inside stage	when { branch 'main' }
+input {}	Adds manual approval gates before proceeding.	Inside stage	input { message 'Approve Deployment?'; ok 'Proceed' }
+parallel {}	Runs multiple stages simultaneously.	Inside stage	parallel { stage('Test') { ... } stage('Lint') { ... } }
+matrix {}	Runs a stage in parallel across multiple parameter combinations.	Inside pipeline or stage	matrix { axes { axis { name 'JDK'; values '11','17' } } }
+libraries {}	Imports shared Jenkins libraries for reusable code.	Top of file	@Library('my-shared-lib') _
+tools {}	Defines required tools globally or per stage.	Inside pipeline or stage	tools { jdk 'JDK_17' }
+post { always/success/failure/unstable/changed }	Post-run cleanup or notifications.	Inside pipeline or stage	post { failure { echo 'Build failed!' } }
+when { branch/expression/environment/allOf/anyOf/not }	Executes stages conditionally.	Inside stage	when { allOf { branch 'main'; environment name: 'ENV', value: 'prod' } }
+stage -> agent {}	Overrides agent only for that stage.	Inside stage	agent { label 'linux' }
+stage -> tools {}	Defines tools for specific stages.	Inside stage	tools { maven 'Maven_3_9_5' }
+stage -> input {}	Pauses execution for manual approval in that stage.	Inside stage	input { message 'Approve release?' }
+stage -> post {}	Adds stage-specific post actions.	Inside stage	post { failure { echo 'Stage failed!' } }
+matrix -> axes {}	Defines dimensions (variables) for matrix build.	Inside matrix	axes { axis { name 'OS'; values 'linux','windows' } }
+matrix -> stages {}	Defines what stages to run for each matrix combination.	Inside matrix	stages { stage('Build') { ... } }
+stage -> environment {}	Defines environment variables only for a stage.	Inside stage	environment { DEPLOY_ENV = 'staging' }
+stage -> stages {}	Allows nested stages inside a parent stage.	Inside stage	stages { stage('Unit Tests') { ... } }
+🧰 5️⃣ Common when Conditions
+Condition	Usage Example	Purpose
+branch	when { branch 'main' }	Run only on main branch.
+expression	when { expression { return params.ENV == 'prod' } }	Custom Groovy logic.
+environment	when { environment name: 'ENV_TYPE', value: 'staging' }	Match specific environment variable.
+not	when { not { branch 'dev' } }	Skip a specific branch.
+allOf	when { allOf { branch 'main'; environment name: 'DEPLOY_ENV', value: 'prod' } }	Combine multiple conditions (AND).
+anyOf	when { anyOf { branch 'dev'; branch 'staging' } }	Run on multiple branches (OR).
+beforeAgent true	Evaluate before allocating the agent.	Optimize performance.
+🧠 6️⃣ Post Block Conditions
+Post Condition	Description	Example
+always	Always runs regardless of build result.	always { cleanWs() }
+success	Runs only if the build succeeds.	success { echo 'Build succeeded!' }
+failure	Runs if the build fails.	failure { echo 'Build failed!' }
+unstable	Runs if the build is unstable.	unstable { echo 'Build unstable!' }
+changed	Runs if the result changed from last build.	changed { echo 'Build result changed.' }
+⚙️ 7️⃣ Common Options Used
+Option	Purpose	Example
+timeout	Abort the build after a set time.	timeout(time: 15, unit: 'MINUTES')
+timestamps	Add timestamps to console output.	timestamps()
+disableConcurrentBuilds	Prevent overlapping runs.	disableConcurrentBuilds()
+skipDefaultCheckout	Skip automatic SCM checkout.	skipDefaultCheckout()
+skipStagesAfterUnstable	Stop execution after unstable result.	skipStagesAfterUnstable()
+buildDiscarder	Keep limited number of build logs.	buildDiscarder(logRotator(numToKeepStr: '5'))
+🧩 8️⃣ Tools Block Examples
+Tool	Purpose	Example
+jdk	Defines Java version.	tools { jdk 'JDK_17' }
+maven	Defines Maven version.	tools { maven 'Maven_3_9_5' }
+gradle	Defines Gradle version.	tools { gradle 'Gradle_8_5' }
+nodejs	Defines Node.js version.	tools { nodejs 'Node_20' }
+🚀 9️⃣ Example: Real-World Jenkinsfile
+pipeline {
+    agent any
+
+    environment {
+        DEPLOY_ENV = 'staging'
+    }
+
+    options {
+        timeout(time: 20, unit: 'MINUTES')
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        choice(name: 'BRANCH', choices: ['main', 'dev', 'feature'], description: 'Branch to build')
+    }
+
+    triggers {
+        pollSCM('H/15 * * * *')
+    }
+
+    tools {
+        maven 'Maven_3_9_5'
+        jdk 'JDK_17'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${params.BRANCH}", url: 'https://github.com/example/app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            parallel {
+                stage('Unit Tests') {
+                    steps { sh 'mvn test' }
+                }
+                stage('Lint') {
+                    steps { sh 'npm run lint' }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when { branch 'main' }
+            input {
+                message 'Approve deployment to production?'
+                ok 'Deploy'
+            }
+            steps {
+                sh './deploy.sh'
+            }
+        }
+    }
+
+    post {
+        always { cleanWs() }
+        success { echo '✅ Build successful!' }
+        failure { echo '❌ Build failed!' }
+    }
+}
+
+🧾 🔟 Summary — Key Declarative Pipeline Blocks
+Category	Block Names
+Top-Level	pipeline, agent, environment, options, parameters, triggers, tools, stages, post
+Stage-Level	stage, steps, agent, environment, tools, when, input, post, parallel, matrix, stages
+Matrix-Level	matrix, axes, stages
+Conditional/Flow Control	when, input, parallel, matrix
+Utility Blocks	libraries, options, tools, environment, post
