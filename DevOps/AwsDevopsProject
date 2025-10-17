@@ -1,0 +1,50 @@
+🚀 Project 1: Scalable E-commerce Application CI/CD Pipeline on AWS
+
+In this project, I implemented a robust CI/CD pipeline for a scalable e-commerce web application hosted on AWS, using Jenkins, Git, SonarQube, and Datadog. The core objective was to create an automated build, test, and deployment pipeline that ensured faster time-to-market while maintaining high code quality and system observability.
+
+The project began with setting up version control in Git, hosted on GitHub. Developers pushed code to feature branches, and upon creation of pull requests, Jenkins was triggered using GitHub webhooks. This allowed Jenkins to automatically fetch the latest code from the branch and run the CI pipeline. The Jenkins pipeline was defined using a Jenkinsfile, which included multiple stages: code checkout, build, test, quality check, and deployment. I containerized Jenkins and ran it on an EC2 instance in a private subnet within a VPC, providing network security and scalability.
+
+In the build stage, we used Maven for building the Java-based application. To ensure code quality and detect bugs early in the development cycle, I integrated SonarQube with Jenkins. SonarQube was hosted on a separate EC2 instance and configured as part of the Jenkins pipeline. The SonarQube analysis provided feedback on code smells, vulnerabilities, and technical debt directly within Jenkins job results, and the SonarQube dashboard was used for continuous code inspection.
+
+Once the code passed the quality gate in SonarQube, it moved to the unit testing stage. Here, JUnit was used for test execution, and code coverage reports were pushed to SonarQube for analysis. This ensured that all new code was adequately tested and met coverage thresholds. If the quality gate failed, Jenkins would stop the pipeline, preventing low-quality code from reaching staging or production.
+
+In the deployment stage, I utilized AWS CodeDeploy integrated with Jenkins to automate deployments. Application artifacts were stored in an S3 bucket after successful builds. From there, CodeDeploy pulled the latest version and deployed it to a group of EC2 instances behind an Application Load Balancer (ALB). To manage different environments, I used tagging strategies and deployment groups in CodeDeploy. Additionally, AWS Elastic Beanstalk was tested for faster deployment scenarios, but CodeDeploy provided greater control and rollback capabilities.
+
+For monitoring and observability, I integrated Datadog with AWS. I installed the Datadog Agent on all EC2 instances and configured it to capture system metrics, application logs, and custom events. With Datadog APM (Application Performance Monitoring), I traced application performance, API response times, and latency issues. Custom dashboards were created in Datadog to visualize real-time metrics and alerts were set up using threshold-based triggers to notify the DevOps team via Slack and email.
+
+Security and access control were managed using AWS IAM roles and policies. Jenkins was configured with role-based access, and secrets (like AWS credentials, SonarQube tokens) were stored securely in AWS Secrets Manager. I also used CloudTrail and CloudWatch Logs to audit API calls and system logs, respectively.
+
+To facilitate infrastructure management, I implemented Terraform to provision EC2 instances, security groups, and S3 buckets. This ensured that the infrastructure could be recreated or scaled in a consistent and reproducible manner. We used Terraform modules to abstract networking and compute resources, allowing multiple teams to reuse code with minimal duplication.
+
+One major challenge was reducing build and test execution time. To solve this, I leveraged Jenkins agent nodes deployed via Auto Scaling Groups (ASGs). Jenkins automatically distributed workload across these agents, reducing build time significantly. Furthermore, I implemented Blue-Green Deployment strategy in CodeDeploy to ensure zero-downtime deployments by switching traffic between two identical environments.
+
+This project was a complete end-to-end implementation of DevOps principles using AWS-native and open-source tools. It improved the release cycle from bi-weekly to daily deployments, enhanced code quality with static analysis, and established full-stack observability. The CI/CD pipeline became a critical part of the team's agile workflow, offering fast feedback, safe deployments, and resilient infrastructure.
+
+
+Project 2: Microservices-Based Healthcare Platform with Containerized CI/CD Pipeline
+
+The second project focused on a microservices-based healthcare management platform where I built a containerized CI/CD pipeline using Docker, Jenkins, Git, SonarQube, and Datadog, all hosted and orchestrated on AWS infrastructure using ECS and EKS. The goal was to improve scalability, automate deployments, and ensure high code quality with real-time monitoring for critical healthcare data services.
+
+The development team followed GitFlow, and all microservices were pushed to separate repositories on GitLab. Webhooks were configured to trigger Jenkins pipelines on every push or merge request to the develop or main branches. Jenkins was containerized using Docker and deployed on AWS ECS (Elastic Container Service), providing horizontal scalability for concurrent jobs.
+
+The Jenkinsfile defined a multi-branch pipeline for each microservice, with stages including code checkout, Docker build, SonarQube scan, unit testing, integration testing, and deployment. Each microservice was containerized using Docker, and images were tagged using Git commit hashes and pushed to Amazon ECR (Elastic Container Registry).
+
+For code quality, Jenkins integrated with SonarQube, which was also containerized and deployed on EKS (Elastic Kubernetes Service). I set up SonarQube with a PostgreSQL backend for persistent storage and used Helm charts for deployment. Each microservice had a dedicated SonarQube project with defined quality gates. Failures in code coverage, bugs, or vulnerabilities would stop the pipeline, enforcing a strict quality control regime.
+
+Unit tests were run inside Docker containers using frameworks like Mocha and Jest for Node.js services, and PyTest for Python services. Integration tests used Docker Compose to simulate service interactions in isolated environments. These tests ensured early detection of service compatibility issues and API contract mismatches.
+
+The deployment strategy used a combination of ECS for stateless services and EKS for services requiring auto-scaling, load balancing, and advanced networking. Using AWS CodePipeline and CodeBuild, Jenkins jobs triggered downstream pipelines that fetched artifacts from ECR and deployed them into appropriate environments. Blue-Green deployments were managed using ALBs and route53 DNS switching, allowing zero-downtime rollouts.
+
+Datadog was a critical component of the observability layer. Each container included the Datadog Agent as a sidecar, streaming logs, metrics, and APM data in real-time. I configured distributed tracing across services to identify latency bottlenecks and database query performance issues. For example, if patient appointment services showed a spike in latency, the trace highlighted slow third-party API responses, allowing rapid diagnosis and remediation.
+
+Infrastructure was provisioned using Terraform and AWS CloudFormation. The Terraform codebase handled networking (VPCs, subnets), ECS/EKS clusters, IAM roles, and ECR repositories. Each environment (dev, QA, prod) had isolated infrastructure, and CI/CD workflows were environment-aware. Terraform workspaces managed different environment configurations, and changes were reviewed using pull requests and automated plans.
+
+Secrets management was handled using AWS Secrets Manager and injected into containers during deployment. This eliminated the risk of hardcoded credentials. Role-based access control was enforced via IAM, and Jenkins jobs used temporary tokens from AWS STS to interact with AWS APIs securely.
+
+To improve build performance, Jenkins jobs ran in Kubernetes pods on EKS using the Jenkins Kubernetes plugin. This enabled dynamic provisioning of build agents on-demand, significantly reducing idle resource usage and improving job concurrency.
+
+One complex aspect was ensuring service-to-service communication security. I implemented service mesh architecture using AWS App Mesh to enforce mTLS (Mutual TLS) between services, monitor traffic, and implement circuit breakers. This helped isolate failing services without affecting the whole platform.
+
+For post-deployment validation, I implemented automated smoke tests and canary deployments. The pipeline deployed new versions to a small percentage of ECS tasks, and Datadog metrics were analyzed over a fixed period. If no anomalies or errors were detected, full-scale deployment proceeded. This minimized the risk of releasing faulty builds to production.
+
+This project successfully demonstrated cloud-native DevOps practices for microservices on AWS. By combining Docker, Git, Jenkins, SonarQube, Datadog, and AWS tools, the team achieved rapid release cycles, robust monitoring, and scalable infrastructure. The platform supported real-time patient management and appointment systems, and the CI/CD pipeline ensured every code change was tested, analyzed, and monitored before reaching end-users.
