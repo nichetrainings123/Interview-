@@ -1,0 +1,212 @@
+🧩 1. What is RHEL (Red Hat Enterprise Linux)
+📘 Definition
+
+RHEL (Red Hat Enterprise Linux) is a commercial-grade Linux distribution developed by Red Hat, Inc., designed for enterprise servers, cloud, and container platforms.
+
+It’s known for:
+
+Long-term stability and security updates
+
+Enterprise support via subscription
+
+Integration with automation tools (Ansible, Satellite, Podman, etc.)
+
+Compatibility across physical, virtual, and cloud environments
+
+🏗️ Key Features
+Feature	Description
+Security	SELinux (Security Enhanced Linux), firewalld
+Package Management	DNF/YUM package manager
+System Management	systemd for process/service management
+Support	Up to 10 years lifecycle support
+Performance	Optimized kernel and libraries
+Automation	Integrated with Red Hat Ansible Automation Platform
+💻 RHEL Variants
+Edition	Use Case
+RHEL Server	For production servers and virtual machines
+RHEL Workstation	Developer desktop environment
+RHEL for Edge / Cloud	For IoT, cloud, and container deployments
+⚙️ 2. RHEL Boot Process (Step-by-Step)
+
+The boot process describes what happens when a RHEL system powers on until it’s ready for use.
+
+🪜 Step 1: BIOS / UEFI Initialization
+
+Performs POST (Power-On Self-Test) — checks hardware (CPU, RAM, disk).
+
+Searches for bootable device based on boot order.
+
+Loads boot loader (like GRUB2) into memory.
+
+🪜 Step 2: Boot Loader (GRUB2)
+
+GRUB2 (GRand Unified Bootloader) loads the Linux kernel.
+
+Displays boot menu (/boot/grub2/grub.cfg).
+
+Passes kernel parameters to the Linux kernel.
+
+Commands related to GRUB:
+
+grub2-editenv list
+cat /boot/grub2/grub.cfg
+
+🪜 Step 3: Kernel Initialization
+
+Kernel (vmlinuz) is loaded into memory.
+
+Initializes hardware drivers.
+
+Mounts initial RAM disk (initramfs).
+
+Prepares root filesystem.
+
+Check kernel version:
+
+uname -r
+
+🪜 Step 4: systemd Initialization
+
+Once kernel starts, it launches PID 1 → systemd.
+
+systemd reads default target (boot mode).
+
+Starts essential services (network, logging, display, etc.).
+
+Check current target:
+
+systemctl get-default
+
+
+Change target (e.g., CLI mode):
+
+systemctl set-default multi-user.target
+
+🪜 Step 5: User Space Initialization
+
+System reaches login prompt (CLI or GUI).
+
+Background daemons like sshd, crond, NetworkManager start.
+
+User can log in via console or SSH.
+
+✅ Summary of Boot Process
+Stage	Component	Description
+1	BIOS/UEFI	Hardware check and boot loader initiation
+2	GRUB2	Loads kernel and initramfs
+3	Kernel	Hardware detection, root FS mounting
+4	systemd	Initializes targets, starts services
+5	User Space	Login prompt, shells, and daemons
+📁 3. Linux Directory Structure (Filesystem Hierarchy)
+
+RHEL follows FHS (Filesystem Hierarchy Standard) for organizing files and directories.
+
+🗂️ Root Directory /
+
+Everything in Linux starts from / — the root of the filesystem tree.
+
+Directory	Purpose / Description
+/boot	Bootloader files, kernel images (vmlinuz, initramfs)
+/bin	Essential user commands (ls, cp, mv)
+/sbin	System binaries (administrative commands)
+/etc	Configuration files for system and services
+/home	User home directories
+/root	Home directory for the root user
+/usr	User programs, libraries (/usr/bin, /usr/lib)
+/var	Variable data (logs, mail, spool, cache)
+/tmp	Temporary files
+/dev	Device files (disks, terminals)
+/proc	Kernel and process information (virtual FS)
+/sys	System information (hardware and drivers)
+/run	Runtime process data
+/mnt	Temporary mount point for external storage
+/media	Mount point for removable devices (CD, USB)
+/opt	Optional or third-party software packages
+🧾 Example Commands
+df -h          # View disk usage by mount point
+lsblk          # List block devices
+du -sh /var/*  # Check directory size
+mount          # List mounted filesystems
+
+🧰 4. Important Operational Commands in RHEL
+
+Below are must-know operational commands categorized for easy memorization:
+
+🧭 A. Navigation & File Management
+pwd                      # Print working directory
+cd /path/to/dir          # Change directory
+ls -l /etc               # List contents with details
+cp file1 file2           # Copy file
+mv file1 dir/            # Move or rename
+rm -rf folder/           # Delete directory
+mkdir newdir             # Create directory
+touch file.txt           # Create new empty file
+
+🧾 B. File Viewing & Editing
+cat file.txt             # Display entire file
+less file.txt            # Page-by-page view
+head -n 10 file.txt      # Show first 10 lines
+tail -f /var/log/messages # Live log monitoring
+nano file.txt            # Edit using Nano
+vim file.txt             # Edit using Vim
+
+👤 C. User & Group Management
+useradd john
+passwd john
+usermod -aG wheel john   # Add user to sudoers group
+groupadd developers
+chown john:developers file.txt
+chmod 755 script.sh
+whoami                   # Current user
+id                       # UID, GID info
+
+⚙️ D. System & Process Management
+ps aux                   # Show all processes
+top                      # Real-time system monitor
+kill -9 <PID>            # Force terminate process
+systemctl start httpd    # Start service
+systemctl status sshd    # Check service status
+systemctl enable nginx   # Auto start at boot
+systemctl reboot         # Restart system
+shutdown -h now          # Power off immediately
+
+📦 E. Package Management (dnf/yum)
+dnf install httpd -y
+dnf remove nginx -y
+dnf update -y
+dnf search mariadb
+dnf info kernel
+dnf list installed
+
+🌐 F. Network & Connectivity
+ip a                     # Display IP addresses
+hostnamectl              # View or set hostname
+ping google.com          # Test network
+nmcli dev status         # NetworkManager interface info
+curl -I https://redhat.com  # Check HTTP headers
+
+🔐 G. Security: SELinux & Firewall
+getenforce               # Check SELinux mode
+setenforce 0             # Set permissive mode (temp)
+firewall-cmd --list-all  # View active rules
+firewall-cmd --add-service=http --permanent
+firewall-cmd --reload
+
+💾 H. Disk Management
+lsblk                    # List block devices
+fdisk -l                 # List partitions
+mount /dev/sdb1 /mnt     # Mount disk
+umount /mnt              # Unmount
+df -h                    # Disk usage
+
+📜 I. System Logs
+journalctl -xe           # View system logs
+tail -f /var/log/messages
+tail -f /var/log/secure  # Authentication logs
+
+🧠 J. System Information
+uname -r                 # Kernel version
+cat /etc/redhat-release  # OS version
+uptime                   # System running time
+free -h                  # Memory usage
+df -Th                   # Disk usage with FS type
